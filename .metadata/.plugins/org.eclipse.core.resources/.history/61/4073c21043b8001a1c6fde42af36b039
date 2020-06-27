@@ -1,0 +1,13 @@
+package Code;
+import static Code.Tokens.*;
+%%
+%class Lexer
+%type Tokens
+W=[a-zA-Z_]+
+D=[0-9]+
+%{
+    public String lexeme;
+%}
+%%
+{W}{D} {lexeme=yytext(); return Identificador;}
+ . {return Error; }

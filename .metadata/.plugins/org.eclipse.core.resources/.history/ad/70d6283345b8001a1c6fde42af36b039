@@ -1,0 +1,120 @@
+package Code;
+
+import java.awt.BorderLayout;
+import java.awt.EventQueue;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.JTextField;
+import javax.swing.JButton;
+import javax.swing.JEditorPane;
+import javax.swing.JTextPane;
+import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.awt.event.ActionEvent;
+import javax.swing.JTextArea;
+
+public class MainFrm extends JFrame {
+
+	private JPanel contentPane;
+	private JTextField textField;
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					MainFrm frame = new MainFrm();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the frame.
+	 */
+	public MainFrm() {
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 492, 539);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		contentPane.setLayout(new BorderLayout(0, 0));
+		setContentPane(contentPane);
+		
+		JPanel panel = new JPanel();
+		contentPane.add(panel, BorderLayout.CENTER);
+		panel.setLayout(null);
+		
+		textField = new JTextField();
+		textField.setBounds(12, 13, 316, 63);
+		panel.add(textField);
+		textField.setColumns(10);
+		
+		JTextArea textArea = new JTextArea();
+		textArea.setBounds(12, 86, 440, 383);
+		panel.add(textArea);
+		
+		JButton btnAnalyze = new JButton("Analizar");
+		btnAnalyze.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				File textFile = new File("text.txt");
+				PrintWriter pr;
+				try {
+					pr = new PrintWriter(textFile);
+					pr.print(textField.getText());
+					pr.close();
+				}
+				catch(FileNotFoundException ex){
+					Logger.getLogger(MainFrm.class.getName()).log(Level.SEVERE, null, ex);
+				}
+				
+				try {
+					Reader reader = new BufferedReader(new FileReader("text.txt"));
+					Lexer lexer = new Lexer(reader);
+					String result = "";
+					
+					while(true) {
+						Tokens tokens = lexer.yylex();
+						if(tokens == null) {
+							result += "Fin";
+							textArea.setText(result);
+							return;
+						}
+						switch(tokens) {
+							case Identificador:
+								result += lexer.lexeme + " Es un Identificador\n";
+								break;
+							case Error:
+								result += "Simbolo no definido\n";
+								break;
+						}
+					}
+				} catch (FileNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
+		btnAnalyze.setBounds(332, 13, 120, 63);
+		panel.add(btnAnalyze);
+		
+		this.setLocationRelativeTo(null);
+	}
+}
